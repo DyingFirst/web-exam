@@ -1,0 +1,28 @@
+version: '3'
+
+networks:
+  backend:
+    driver: bridge
+
+services:
+  mysql_1:
+    image: mysql:latest
+    container_name: my-mysql-container
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: baseWeb
+    ports:
+      - "3306:3306"
+    restart: always
+    volumes:
+      - ./data:/var/lib/mysql
+    networks:
+      - backend
+  exam:
+    build: ./
+    volumes:
+      - ./:/code
+    ports:
+      - "8001:5000"
+    networks:
+      - backend
