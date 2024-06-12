@@ -1,12 +1,14 @@
 FROM python:3.11-slim
 
-WORKDIR /app
+WORKDIR /code
 
-COPY requirements.txt /app/
+COPY ./requirements.txt /code/requirements.txt
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
-COPY . /app
+COPY ./app /code/app
+
+WORKDIR /code/app
 
 EXPOSE 5000
 
