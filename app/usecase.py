@@ -436,3 +436,16 @@ def load_view_stats_csv(db):
         return None
 
     return view_stats
+
+def getRoleIDByName(name_role, db):
+    db_conn = db.connection()
+    try:
+        cursor = db_conn.cursor(named_tuple=True)
+        cursor.execute(sql_queris.queryGetRoleIDByName, (name_role,))
+        role = cursor.fetchone()
+        cursor.close()
+        return role
+    except mysql.connector.Error as err:
+        print("Something went wrong: {}".format(err))
+        db_conn.rollback()
+        return None

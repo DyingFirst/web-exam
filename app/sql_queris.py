@@ -268,3 +268,5 @@ queryLoadStatsView = """
             v.user_id IS NOT NULL
         GROUP BY b.id ORDER BY view_count DESC
         """
+
+queryGetRoleIDByName = """SELECT id FROM roles WHERE name = %s;"""

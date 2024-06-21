@@ -3,10 +3,8 @@ from flask import g
 
 
 class MySQL:
-    def __init__(self, app, config):
-        self.app = app
+    def __init__(self, config):
         self.cfg = config
-        self.app.teardown_appcontext(self.close_connection)
 
     def config(self):
         return {

@@ -18,8 +18,10 @@ Markdown(app)
 
 cfg = readconfig()
 app.config['SECRET_KEY'] = cfg['key']
-app.config['ADMIN_ROLE_ID'] = cfg['ADMIN_ROLE_ID']
-app.config['MODER_ROLE_ID'] = cfg['MODER_ROLE_ID']
+db = MySQL(cfg)
+
+app.config['ADMIN_ROLE_ID'] = usecase.getRoleIDByName(db, "administrator")
+app.config['MODER_ROLE_ID'] = usecase.getRoleIDByName(db, "moderator")
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -32,7 +34,7 @@ UPLOAD_FOLDER = './static'
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-db = MySQL(app, cfg)
+
 
 init_login_manager(app, db)
 
