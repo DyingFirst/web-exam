@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Статистика</h1>
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="user-log-tab" data-bs-toggle="tab" data-bs-target="#user-log" type="button" role="tab" aria-controls="user-log" aria-selected="true">Журнал действий пользователей</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="book-stats-tab" data-bs-toggle="tab" data-bs-target="#book-stats" type="button" role="tab" aria-controls="book-stats" aria-selected="false">Статистика просмотра книг</button>
+  </li>
+</ul>
+<div class="tab-content" id="myTabContent">
+  <div class="tab-pane fade show active" id="user-log" role="tabpanel" aria-labelledby="user-log-tab">
+    <!-- Содержимое вкладки "Журнал действий пользователей" -->
+    <h2>Журнал действий пользователей</h2>
+    <a href="{{ url_for('export_user_log_csv') }}" class="btn btn-secondary mb-3">Экспорт в CSV</a>
+     <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th scope="col">№</th>
+          <th scope="col">ФИО пользователя</th>
+          <th scope="col">Название просмотренной книги</th>
+          <th scope="col">Дата и время просмотра</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <th scope="row">{{ loop.index + (user_log_pagination.page - 1) * user_log_pagination.per_page }}</th>
+          <td>{{ log.last_name + " " + log.first_name + " " + log.middle_name if log.first_name else "Неаутентифицированный пользователь"}}</td>
+          <td>{{ log.title }}</td>
+          <td>{{ log.created_at }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {{ user_log_pagination.links }}
+  </div>
+  <div class="tab-pane fade" id="book-stats" role="tabpanel" aria-labelledby="book-stats-tab">
+    <!-- Содержимое вкладки "Статистика просмотра книг" -->
+    <h2>Статистика просмотра книг</h2>
+    <form method="get" action="{{ url_for('stats') }}">
+      <div class="row">
+        <div class="col-md-5">
+          <div class="mb-3">
+            <label for="date_from" class="form-label">Дата от</label>
+            <input type="date" class="form-control" id="date_from" name="date_from" value="{{ request.args.get('date_from', '') }}">
+          </div>
+        </div>
+        <div class="col-md-5">
+          <div class="mb-3">
+            <label for="date_to" class="form-label">Дата до</label>
+            <input type="date" class="form-control" id="date_to" name="date_to" value="{{ request.args.get('date_to', '') }}">
+          </div>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button type="submit" class="btn btn-primary">Применить</button>
+        </div>
+      </div>
+    </form>
+    <a href="{{ url_for('export_view_stats_csv') }}" class="btn btn-secondary mb-3">Экспорт в CSV</a>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th scope="col">№</th>
+          <th scope="col">Название книги</th>
+          <th scope="col">Количество просмотров</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for view_stat in view_stats %}
+        <tr>
+          <th scope="row">{{ loop.index + (book_stats_pagination.page - 1) * book_stats_pagination.per_page }}</th>
+          <td>{{ view_stat.title }}</td>
+          <td>{{ view_stat.view_count }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {{ book_stats_pagination.links }}
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const activeTab = localStorage.getItem('activeTab');
+    if (activeTab) {
+      const tabElement = document.querySelector(`button[data-bs-target="${activeTab}"]`);
+      const tab = new bootstrap.Tab(tabElement);
+      tab.show();
+    }
+
+    const tabButtons = document.querySelectorAll('#myTab button');
+    tabButtons.forEach(button => {
+      button.addEventListener('shown.bs.tab', function (event) {
+        localStorage.setItem('activeTab', event.target.dataset.bsTarget);
+      });
+    });
+  });
+</script>
+{% endblock %}

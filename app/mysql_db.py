@@ -14,6 +14,7 @@ class MySQL:
             "password": self.cfg['database']['password'],
             "database": self.cfg['database']['database'],
             "host": self.cfg['database']['host'],
+            "port": self.cfg['database']['port'],
             "auth_plugin": 'mysql_native_password'
         }
 

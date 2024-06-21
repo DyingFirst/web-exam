@@ -6,3 +6,4 @@ database:
   password: "root"
   database: "baseWeb"
   host: "my-mysql-container"
+  port: 3306

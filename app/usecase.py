@@ -179,13 +179,9 @@ def delete_book_by_id(book_id, db, save_path) -> bool:
         cursor.execute(sql_queris.queryDeleteFromBookGenres, (book_id,))
         db_conn.commit()
 
-        cursor.execute(sql_queris.queryDeleteFromReviews, (book_id,))
-        db_conn.commit()
-
         cursor.execute(sql_queris.queryDeleteBookByID, (book_id,))
         db_conn.commit()
 
-        print(len(books))
         if len(books) <= 1:
             cursor.execute(sql_queris.queryDeleteFromBookCoversByCoverID, (cover_id,))
             db_conn.commit()
@@ -335,3 +331,108 @@ def most_popular(db):
 
     return books
 
+
+def load_user_activity_log(db, per_page, offset):
+    db_conn = db.connection()
+
+    try:
+        cursor = db_conn.cursor(named_tuple=True)
+        cursor.execute(sql_queris.queryLoadUserActiveUser, (per_page, offset))
+        logs = cursor.fetchall()
+
+        cursor.execute(sql_queris.queryGetCountActiveUser)
+        total = cursor.fetchone().view_count
+
+        db_conn.commit()
+        cursor.close()
+
+    except mysql.connector.Error as err:
+        print("Something went wrong: {}".format(err))
+        db_conn.rollback()
+        return None
+
+    return logs, total
+
+
+def load_view_stats(db, per_page, offset, date_from, date_to):
+    db_conn = db.connection()
+
+    try:
+        cursor = db_conn.cursor(named_tuple=True)
+        view_stats_query = """
+                SELECT 
+                    b.title, 
+                    COUNT(v.id) AS view_count 
+                FROM 
+                    views v
+                JOIN 
+                    books b ON v.book_id = b.id
+                WHERE 
+                    v.user_id IS NOT NULL
+            """
+        params = []
+        if date_from:
+            view_stats_query += " AND v.view_date >= %s"
+            params.append(date_from)
+        if date_to:
+            view_stats_query += " AND v.view_date <= %s"
+            params.append(date_to)
+
+        view_stats_query += " GROUP BY b.id ORDER BY view_count DESC LIMIT %s OFFSET %s"
+        params.extend([per_page, offset])
+
+        cursor.execute(view_stats_query, tuple(params))
+        view_stats = cursor.fetchall()
+
+        cursor.execute(sql_queris.queryGetCountStatsView)
+        total = cursor.fetchone().view_count
+
+        db_conn.commit()
+        cursor.close()
+
+    except mysql.connector.Error as err:
+        print("Something went wrong: {}".format(err))
+        db_conn.rollback()
+        return None
+
+    return view_stats, total
+
+
+def load_user_activity_log_csv(db):
+    db_conn = db.connection()
+
+    try:
+        cursor = db_conn.cursor(named_tuple=True)
+        cursor.execute(sql_queris.queryLoadUserActiveUserCSV)
+
+        logs = cursor.fetchall()
+
+        db_conn.commit()
+        cursor.close()
+
+    except mysql.connector.Error as err:
+        print("Something went wrong: {}".format(err))
+        db_conn.rollback()
+        return None
+
+    return logs
+
+
+def load_view_stats_csv(db):
+    db_conn = db.connection()
+
+    try:
+        cursor = db_conn.cursor(named_tuple=True)
+        cursor.execute(sql_queris.queryLoadStatsView)
+
+        view_stats = cursor.fetchall()
+
+        db_conn.commit()
+        cursor.close()
+
+    except mysql.connector.Error as err:
+        print("Something went wrong: {}".format(err))
+        db_conn.rollback()
+        return None
+
+    return view_stats

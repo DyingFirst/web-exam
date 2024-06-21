@@ -36,10 +36,15 @@
             <div class="container">
                 <a class="navbar-brand" href="{{ url_for('index') }}">(АИС) «Электронная библиотека»</a>
                 <ul class="navbar-nav">
+                    {% if current_user.is_authenticated and current_user.can("create")  %}
                     <li class="nav-item">
                     <a class="nav-link {% if request.endpoint == 'add_book' %} active {% endif %}"
                                 href="{{ url_for('add_book') }}">Добавить книгу</a>
                     </li>
+                    <a class="nav-link {% if request.endpoint == 'stats' %} active {% endif %}"
+                                href="{{ url_for('stats') }}">Статистика</a>
+                    </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'add_book' %} active {% endif %}"
                            href="{{ url_for('most_popular') }}">Популярные книги</a>

@@ -9,6 +9,7 @@
 				  <div class="card-body">
 					<h5 class="card-title">{{book.title}}</h5>
 					  <h6 class="card-subtitle mb-2 text-muted">{{book.author}}</h6>
+					  <h6 class="card-subtitle mb-2 text-muted">{{book.genres if book.genres else "Не указаны"}}</h6>
 					  <h6 class="card-subtitle mb-2 text-muted fs-6">{{book.year}}</h6>
 					  <div class="d-flex align-items-center mb-2">
 						  <svg height="16px" width="16px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"

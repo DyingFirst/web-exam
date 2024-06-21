@@ -6,6 +6,7 @@ queryGetBatchBook = """
         SELECT
             b.id,
             b.title,
+            b.author,
             GROUP_CONCAT(g.name ORDER BY g.name ASC) as genres,
             b.year,
             COALESCE(ROUND(AVG(r.rating), 1), 0) as average_rating,
@@ -198,3 +199,72 @@ queryMostPopular = """
         LIMIT 5
         """
 
+queryLoadUserActiveUser = """
+        SELECT 
+            COALESCE(u.last_name, '') AS last_name,
+            COALESCE(u.first_name, '') AS first_name,
+            COALESCE(u.middle_name, '') AS middle_name,
+            b.title,
+            v.created_at
+        FROM 
+            visit_logs v
+        LEFT JOIN 
+            users u ON v.user_id = u.id
+        JOIN 
+            books b ON SUBSTRING_INDEX(SUBSTRING_INDEX(v.path, '/', -1), '}', 1) = b.id
+        WHERE 
+            v.path LIKE '/books/view/%'
+        ORDER BY 
+            v.created_at DESC
+        LIMIT %s OFFSET %s
+        """
+
+queryGetCountActiveUser = """
+        SELECT 
+            COUNT(*) AS view_count
+        FROM 
+            visit_logs v
+        JOIN 
+            books b ON SUBSTRING_INDEX(SUBSTRING_INDEX(v.path, '/', -1), '}', 1) = b.id
+        WHERE 
+            v.path LIKE '/books/view/%'
+        """
+
+queryGetCountStatsView = """
+        SELECT COUNT(DISTINCT b.id) AS view_count 
+        FROM views v 
+        JOIN books b ON v.book_id = b.id 
+        WHERE v.user_id IS NOT NULL
+        """
+
+queryLoadUserActiveUserCSV = """
+        SELECT 
+            COALESCE(u.last_name, '') AS last_name, 
+            COALESCE(u.first_name, '') AS first_name, 
+            COALESCE(u.middle_name, '') AS middle_name, 
+            b.title, 
+            v.created_at 
+        FROM 
+            visit_logs v
+        LEFT JOIN 
+            users u ON v.user_id = u.id
+        JOIN 
+            books b ON SUBSTRING_INDEX(SUBSTRING_INDEX(v.path, '/', -1), '}', 1) = b.id
+        WHERE 
+            v.path LIKE '/books/view/%'
+        ORDER BY 
+            v.created_at DESC
+        """
+
+queryLoadStatsView = """
+        SELECT 
+            b.title, 
+            COUNT(v.id) AS view_count 
+        FROM 
+            views v
+        JOIN 
+            books b ON v.book_id = b.id
+        WHERE 
+            v.user_id IS NOT NULL
+        GROUP BY b.id ORDER BY view_count DESC
+        """
